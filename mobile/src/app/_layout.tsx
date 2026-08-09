@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
 import {
+    DMSans_300Light,
   DMSans_400Regular,
   DMSans_500Medium,
   DMSans_600SemiBold,
@@ -14,6 +15,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    DMSans_300Light,
     DMSans_400Regular,
     DMSans_500Medium,
     DMSans_600SemiBold,
