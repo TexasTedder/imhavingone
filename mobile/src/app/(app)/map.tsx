@@ -327,6 +327,11 @@ export default function MapScreen() {
         <MapView
           provider={PROVIDER_DEFAULT}
           style={StyleSheet.absoluteFillObject}
+          mapType="mutedStandard"
+          showsPointsOfInterests={false}
+          showsBuildings={false}
+          showsTraffic={false}
+          showsIndoors={false}
           initialRegion={{
             latitude: -29.862,
             longitude: 31.004,
