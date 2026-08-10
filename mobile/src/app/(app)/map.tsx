@@ -414,7 +414,10 @@ export default function MapScreen() {
             </Pressable>
           </View>
 
-          <Pressable style={styles.roundButton}>
+          <Pressable
+            style={styles.roundButton}
+            onPress={() => router.push("/admin")}
+          >
             <Ionicons
               name="menu"
               size={24}
@@ -694,7 +697,12 @@ export default function MapScreen() {
 
           <View style={styles.bottomNav}>
             <BottomNavItem icon="location" label="Map" active />
-            <BottomNavItem icon="people-outline" label="KaClinks" />
+
+            <BottomNavItem
+              icon="people-outline"
+              label="Friends"
+              onPress={() => router.push("/friends")}
+            />
 
             <View style={styles.navSpacer} />
 
@@ -835,13 +843,18 @@ function BottomNavItem({
   icon,
   label,
   active = false,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   active?: boolean;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable style={styles.navItem}>
+    <Pressable
+      style={styles.navItem}
+      onPress={onPress}
+    >
       <Ionicons
         name={icon}
         size={21}
