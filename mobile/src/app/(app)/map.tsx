@@ -741,7 +741,11 @@ export default function MapScreen() {
             <View style={styles.navSpacer} />
 
             <BottomNavItem icon="heart-outline" label="Activity" />
-            <BottomNavItem icon="person-outline" label="Profile" />
+            <BottomNavItem
+              icon="person-outline"
+              label="Profile"
+              onPress={() => router.push("/profile")}
+            />
           </View>
         </View>
       </View>
