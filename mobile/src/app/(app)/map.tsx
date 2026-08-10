@@ -337,7 +337,6 @@ export default function MapScreen() {
           showsUserLocation={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}
-          onPress={() => setSelectedFriend(null)}
         >
           {visiblePeople.map((person) => (
             <Marker
@@ -512,13 +511,31 @@ export default function MapScreen() {
             </View>
 
             {selectedFriend.photo ? (
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/status",
+                  params: {
+                    nickname: selectedFriend.nickname,
+                    time: selectedFriend.time,
+                    drinkName: selectedFriend.drinkName ?? "Having One",
+                    location: selectedFriend.location ?? "Location hidden",
+                    avatar: selectedFriend.avatar,
+                    photo: selectedFriend.photo,
+                    kaclinks: String(selectedFriend.kaclinks ?? 0),
+                    minutesAgo: String(selectedFriend.minutesAgo),
+                  },
+                })
+              }
+            >
               <Image
                 source={{ uri: selectedFriend.photo }}
                 style={styles.friendPhoto}
                 resizeMode="cover"
               />
-            ) : (
-              <View style={styles.friendPhotoPlaceholder}>
+            </Pressable>
+          ) : (
+            <View style={styles.friendPhotoPlaceholder}>
                 <Ionicons
                   name="image-outline"
                   size={34}
@@ -567,7 +584,24 @@ export default function MapScreen() {
                 </Text>
               </View>
 
-              <Pressable style={styles.summaryNext}>
+              <Pressable
+                style={styles.summaryNext}
+                onPress={() =>
+                  router.push({
+                    pathname: "/status",
+                    params: {
+                      nickname: selectedFriend.nickname,
+                      time: selectedFriend.time,
+                      drinkName: selectedFriend.drinkName ?? "Having One",
+                      location: selectedFriend.location ?? "Location hidden",
+                      avatar: selectedFriend.avatar,
+                      photo: selectedFriend.photo ?? "",
+                      kaclinks: String(selectedFriend.kaclinks ?? 0),
+                      minutesAgo: String(selectedFriend.minutesAgo),
+                    },
+                  })
+                }
+              >
                 <Ionicons
                   name="chevron-forward"
                   size={17}
