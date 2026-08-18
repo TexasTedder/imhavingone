@@ -328,7 +328,7 @@ export default function MapScreen() {
           provider={PROVIDER_DEFAULT}
           style={StyleSheet.absoluteFillObject}
           mapType="mutedStandard"
-          showsPointsOfInterests={false}
+          //showsPointsOfInterests={false}
           showsBuildings={false}
           showsTraffic={false}
           showsIndoors={false}
