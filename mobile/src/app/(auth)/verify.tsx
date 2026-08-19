@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { API_BASE_URL } from "@/constants/api";
 import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -39,10 +40,12 @@ export default function VerifyScreen() {
 
   const mode = params.mode === "reset" ? "reset" : "register";
 
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState("");
   const [secondsRemaining, setSecondsRemaining] = useState(OTP_SECONDS);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const inputs = useRef<Array<TextInput | null>>([]);
+  const otpInputRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
     if (secondsRemaining <= 0) return;
@@ -59,34 +62,74 @@ export default function VerifyScreen() {
 
   const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
-  const handleChange = (value: string, index: number) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
+  const handleOtpChange = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, OTP_LENGTH);
+    setOtp(digits);
 
-    const updated = [...code];
-    updated[index] = digit;
-    setCode(updated);
-
-    if (digit && index < OTP_LENGTH - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyPress = (key: string, index: number) => {
-    if (key === "Backspace" && !code[index] && index > 0) {
-      inputs.current[index - 1]?.focus();
+    if (errorMessage) {
+      setErrorMessage("");
     }
   };
 
   const handleResend = () => {
-    setCode(["", "", "", "", "", ""]);
+    setOtp("");
+    setErrorMessage("");
     setSecondsRemaining(OTP_SECONDS);
-    inputs.current[0]?.focus();
+    otpInputRef.current?.focus();
 
     // Later: call resend OTP endpoint.
     // Keep this disabled from real SMS sending until the API flow is wired.
   };
 
-  const isComplete = code.every((digit) => digit.length === 1);
+  const handleVerify = async () => {
+    if (otp.length !== OTP_LENGTH || isVerifying) return;
+
+    setIsVerifying(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mobile,
+            otp,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(
+          data?.message || "Unable to verify this code."
+        );
+        return;
+      }
+
+      if (mode === "reset") {
+        router.replace({
+          pathname: "/reset-password",
+          params: { mobile: data.mobile || mobile },
+        });
+        return;
+      }
+
+      router.replace("/profile-setup");
+    } catch (error) {
+      setErrorMessage(
+        "Could not connect to the ImHavingOne server."
+      );
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const isComplete = otp.length === OTP_LENGTH;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -126,30 +169,41 @@ export default function VerifyScreen() {
             </Text>
           </View>
 
-          <View style={styles.otpRow}>
-            {code.map((digit, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => {
-                  inputs.current[index] = ref;
-                }}
-                value={digit}
-                onChangeText={(value) => handleChange(value, index)}
-                onKeyPress={({ nativeEvent }) =>
-                  handleKeyPress(nativeEvent.key, index)
-                }
-                keyboardType="number-pad"
-                maxLength={1}
-                selectTextOnFocus
-                textContentType="oneTimeCode"
-                autoComplete="sms-otp"
-                style={[
-                  styles.otpInput,
-                  digit && styles.otpInputActive,
-                ]}
-              />
-            ))}
-          </View>
+          <Pressable
+            style={styles.otpArea}
+            onPress={() => otpInputRef.current?.focus()}
+          >
+            <TextInput
+              ref={otpInputRef}
+              value={otp}
+              onChangeText={handleOtpChange}
+              keyboardType="number-pad"
+              maxLength={OTP_LENGTH}
+              textContentType="oneTimeCode"
+              autoComplete="sms-otp"
+              caretHidden
+              style={styles.hiddenOtpInput}
+            />
+
+            <View style={styles.otpRow} pointerEvents="none">
+              {Array.from({ length: OTP_LENGTH }).map((_, index) => {
+                const digit = otp[index] || "";
+                const isCurrent = index === otp.length && otp.length < OTP_LENGTH;
+
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.otpInput,
+                      (digit || isCurrent) && styles.otpInputActive,
+                    ]}
+                  >
+                    <Text style={styles.otpDigit}>{digit}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </Pressable>
 
           <View style={styles.timerRow}>
             <Text style={styles.timerLabel}>Code expires in </Text>
@@ -159,29 +213,21 @@ export default function VerifyScreen() {
             </Text>
           </View>
 
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
+
           <Pressable
-            disabled={!isComplete}
+            disabled={!isComplete || isVerifying}
             style={({ pressed }) => [
               styles.verifyButton,
-              !isComplete && styles.verifyButtonDisabled,
-              pressed && isComplete && styles.buttonPressed,
+              (!isComplete || isVerifying) && styles.verifyButtonDisabled,
+              pressed && isComplete && !isVerifying && styles.buttonPressed,
             ]}
-            onPress={() => {
-              const otp = code.join("");
-
-              // Next step:
-              // POST { mobile, otp } to /api/auth/verify-otp.
-              //
-              // Register mode success:
-              // router.replace("/profile-setup")
-              //
-              // Reset mode success:
-              // router.replace({ pathname: "/reset-password", params: { mobile } })
-              console.log("OTP ready to verify:", otp, mode, mobile);
-            }}
+            onPress={handleVerify}
           >
             <Text style={styles.verifyButtonText}>
-              Verify & continue
+              {isVerifying ? "Verifying..." : "Verify & continue"}
             </Text>
           </Pressable>
 
@@ -320,11 +366,21 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: COLORS.charcoal,
   },
+  otpArea: {
+    position: "relative",
+    marginTop: 26,
+  },
+  hiddenOtpInput: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.01,
+    color: "transparent",
+    backgroundColor: "transparent",
+    zIndex: 2,
+  },
   otpRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 8,
-    marginTop: 26,
   },
   otpInput: {
     flex: 1,
@@ -334,7 +390,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.line,
     borderRadius: 9,
     backgroundColor: COLORS.paper,
-    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  otpDigit: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 20,
     color: COLORS.charcoal,
@@ -357,6 +416,14 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_700Bold",
     fontSize: 14,
     color: COLORS.mintStrong,
+  },
+  errorText: {
+    marginTop: 16,
+    textAlign: "center",
+    fontFamily: "DMSans_500Medium",
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#B42318",
   },
   verifyButton: {
     height: 50,
