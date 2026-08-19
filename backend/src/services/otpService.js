@@ -48,8 +48,13 @@ function verifyOtp(mobile, otp) {
   };
 }
 
+function deleteOtp(mobile) {
+  otpStore.delete(mobile);
+}
+
 module.exports = {
   generateOtp,
   saveOtp,
   verifyOtp,
+  deleteOtp,
 };

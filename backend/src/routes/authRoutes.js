@@ -12,7 +12,12 @@ const {
   generateOtp,
   saveOtp,
   verifyOtp,
+  deleteOtp,
 } = require("../services/otpService");
+
+const {
+  sendSms,
+} = require("../services/smsService");
 
 const router = express.Router();
 
@@ -21,7 +26,7 @@ const router = express.Router();
 // REGISTER
 // ============================================
 
-router.post("/register", (req, res) => {
+router.post("/register", async (req, res) => {
   const { mobile, password } = req.body;
 
   if (!mobile || !password) {
@@ -53,7 +58,25 @@ router.post("/register", (req, res) => {
 
   saveOtp(normalizedMobile, otp);
 
-  console.log(`DEV OTP for ${normalizedMobile}: ${otp}`);
+  const smsMessage =
+    `Your ImHavingOne verification code is ${otp}`;
+
+      try {
+    await sendSms(
+      normalizedMobile.replace("+", ""),
+      smsMessage,
+      false
+    );
+  } catch (error) {
+    console.error("SMS send failed:", error.message);
+
+    deleteOtp(normalizedMobile);
+
+    return res.status(502).json({
+      ok: false,
+      message: "We could not send your verification code. Please try again.",
+    });
+  }
 
   return res.status(200).json({
     ok: true,

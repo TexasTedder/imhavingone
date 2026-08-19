@@ -1,4 +1,5 @@
 async function sendSms(destination, message, testMode = true) {
+
   const clientId = process.env.SMSPORTAL_CLIENT_ID;
   const secretKey = process.env.SMSPORTAL_SECRET_KEY;
 
