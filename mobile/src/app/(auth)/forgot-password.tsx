@@ -15,7 +15,6 @@ import {
 const COLORS = {
   mint: "#41B39E",
   mintStrong: "#2E8F7D",
-  mintSoft: "#D9F0EC",
   paper: "#FFFFFF",
   charcoal: "#23262B",
   darkGrey: "#5B5F63",
@@ -25,12 +24,10 @@ const COLORS = {
 };
 
 export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
 
-  const emailLooksValid =
-    email.trim().length > 5 &&
-    email.includes("@") &&
-    email.includes(".");
+  const mobileLooksValid =
+    mobile.replace(/\D/g, "").length >= 10;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -38,7 +35,6 @@ export default function ForgotPasswordScreen() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Back */}
         <Pressable
           style={styles.backButton}
           onPress={() => router.back()}
@@ -52,7 +48,6 @@ export default function ForgotPasswordScreen() {
         </Pressable>
 
         <View style={styles.content}>
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>
               Forgot your{"\n"}
@@ -62,53 +57,51 @@ export default function ForgotPasswordScreen() {
             <View style={styles.sunshineLine} />
 
             <Text style={styles.subtitle}>
-              No problem. Enter your email address and we’ll send you a code to
-              reset it.
+              Enter the mobile number linked to your ImHavingOne account and
+              we’ll send you a 6-digit reset code by SMS.
             </Text>
           </View>
 
-          {/* Email */}
           <View style={styles.form}>
-            <Text style={styles.label}>Email address</Text>
+            <Text style={styles.label}>Mobile number</Text>
 
             <View style={styles.inputShell}>
               <Ionicons
-                name="mail-outline"
+                name="phone-portrait-outline"
                 size={18}
                 color={COLORS.darkGrey}
                 style={styles.inputIcon}
               />
 
               <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Email address"
+                value={mobile}
+                onChangeText={setMobile}
+                placeholder="082 123 4567"
                 placeholderTextColor={COLORS.faint}
-                keyboardType="email-address"
-                autoCapitalize="none"
+                keyboardType="phone-pad"
                 autoCorrect={false}
-                textContentType="emailAddress"
+                textContentType="telephoneNumber"
                 style={styles.input}
               />
             </View>
 
             <Pressable
-              disabled={!emailLooksValid}
+              disabled={!mobileLooksValid}
               style={({ pressed }) => [
                 styles.sendButton,
-                !emailLooksValid && styles.sendButtonDisabled,
-                pressed && emailLooksValid && styles.buttonPressed,
+                !mobileLooksValid && styles.sendButtonDisabled,
+                pressed && mobileLooksValid && styles.buttonPressed,
               ]}
               onPress={() => {
-                // Real reset OTP request will be connected later.
-                router.push("/verify");
+                // Later:
+                // POST mobile to forgot-password endpoint.
+                // On success route to /verify?mode=reset&mobile=...
               }}
             >
               <Text style={styles.sendButtonText}>Send reset code</Text>
             </Pressable>
           </View>
 
-          {/* Help card */}
           <View style={styles.helpCard}>
             <View style={styles.helpIcon}>
               <Ionicons
@@ -119,16 +112,15 @@ export default function ForgotPasswordScreen() {
             </View>
 
             <View style={styles.helpCopy}>
-              <Text style={styles.helpTitle}>Keep your account secure</Text>
+              <Text style={styles.helpTitle}>Secure account recovery</Text>
 
               <Text style={styles.helpText}>
-                We’ll only send a reset code to the email linked to your
-                ImHavingOne account.
+                We’ll only send the reset code to the verified mobile number
+                linked to your account.
               </Text>
             </View>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Remembered it?</Text>
 
@@ -150,11 +142,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.paper,
   },
-
   container: {
     flex: 1,
   },
-
   backButton: {
     position: "absolute",
     top: 18,
@@ -164,20 +154,15 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: "center",
   },
-
   content: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 150,
+    paddingTop: 145,
     paddingBottom: 28,
   },
-
-  /* Header */
-
   header: {
     alignItems: "center",
   },
-
   title: {
     textAlign: "center",
     fontFamily: "DMSans_700Bold",
@@ -186,11 +171,9 @@ const styles = StyleSheet.create({
     letterSpacing: -1.2,
     color: COLORS.charcoal,
   },
-
   titleMint: {
     color: COLORS.mint,
   },
-
   sunshineLine: {
     width: 44,
     height: 3,
@@ -198,30 +181,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.sunshine,
     marginTop: 16,
   },
-
   subtitle: {
     marginTop: 23,
-    maxWidth: 310,
+    maxWidth: 315,
     textAlign: "center",
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
     lineHeight: 21,
     color: COLORS.darkGrey,
   },
-
-  /* Form */
-
   form: {
     marginTop: 34,
   },
-
   label: {
     marginBottom: 8,
     fontFamily: "DMSans_600SemiBold",
     fontSize: 12,
     color: COLORS.charcoal,
   },
-
   inputShell: {
     height: 50,
     borderWidth: 1,
@@ -231,12 +208,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-
   inputIcon: {
     marginLeft: 14,
     marginRight: 11,
   },
-
   input: {
     flex: 1,
     height: "100%",
@@ -246,7 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     color: COLORS.charcoal,
   },
-
   sendButton: {
     height: 50,
     marginTop: 16,
@@ -255,23 +229,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   sendButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.48,
   },
-
   sendButtonText: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 14.5,
     color: COLORS.paper,
   },
-
   buttonPressed: {
     opacity: 0.82,
   },
-
-  /* Help */
-
   helpCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -281,21 +249,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
     paddingVertical: 15,
   },
-
   helpIcon: {
     width: 42,
   },
-
   helpCopy: {
     flex: 1,
   },
-
   helpTitle: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 12.5,
     color: COLORS.charcoal,
   },
-
   helpText: {
     marginTop: 3,
     fontFamily: "DMSans_400Regular",
@@ -303,9 +267,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: COLORS.charcoal,
   },
-
-  /* Footer */
-
   footer: {
     marginTop: "auto",
     flexDirection: "row",
@@ -314,13 +275,11 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingTop: 24,
   },
-
   footerText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 11.5,
     color: COLORS.charcoal,
   },
-
   loginText: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 11.5,

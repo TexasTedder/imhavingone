@@ -1,20 +1,18 @@
 import { router } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 
 import { IHO } from '@/constants/iho-theme';
 
 export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
-      {/* Brand mark */}
       <Image
         source={require('@/assets/images/imhavingone-app-icon.png')}
         style={styles.appIcon}
         resizeMode="contain"
       />
 
-      {/* Headline */}
       <Text style={styles.heading}>
         See who&apos;s{'\n'}
         <Text style={styles.headingMint}>having one.</Text>
@@ -22,7 +20,6 @@ export default function WelcomeScreen() {
 
       <View style={styles.accentLine} />
 
-      {/* Description */}
       <Text style={styles.description}>
         ImHavingOne shows you, your friends{'\n'}
         and everyone around you who&apos;s{'\n'}
@@ -35,7 +32,6 @@ export default function WelcomeScreen() {
         you like. Simple as that.
       </Text>
 
-      {/* Feature icons */}
       <View style={styles.features}>
         <FeatureItem type="map" label="Live Map" tone="mint" />
         <FeatureItem type="camera" label="Snap & Share" tone="cream" />
@@ -43,7 +39,6 @@ export default function WelcomeScreen() {
         <FeatureItem type="friends" label="Friends" tone="pink" />
       </View>
 
-      {/* Onboarding indicator */}
       <View style={styles.dots}>
         <View style={[styles.dot, styles.dotActive]} />
         <View style={styles.dot} />
@@ -51,7 +46,6 @@ export default function WelcomeScreen() {
         <View style={styles.dot} />
       </View>
 
-      {/* Actions */}
       <View style={styles.actions}>
         <Pressable
           style={({ pressed }) => [
@@ -81,18 +75,7 @@ export default function WelcomeScreen() {
   );
 }
 
-type FeatureType = 'map' | 'camera' | 'cheers' | 'friends';
-type FeatureTone = 'mint' | 'cream' | 'yellow' | 'pink';
-
-function FeatureItem({
-  type,
-  label,
-  tone,
-}: {
-  type: FeatureType;
-  label: string;
-  tone: FeatureTone;
-}) {
+function FeatureItem({ type, label, tone }) {
   return (
     <View style={styles.featureItem}>
       <View
@@ -114,7 +97,7 @@ function FeatureItem({
   );
 }
 
-function FeatureIcon({ type }: { type: FeatureType }) {
+function FeatureIcon({ type }) {
   if (type === 'map') {
     return (
       <Svg width="32" height="32" viewBox="0 0 32 32">
@@ -188,30 +171,6 @@ function FeatureIcon({ type }: { type: FeatureType }) {
           stroke={IHO.colors.charcoal}
           strokeWidth="1.3"
         />
-        <Line
-          x1="18"
-          y1="5"
-          x2="18"
-          y2="1"
-          stroke="#F6B93B"
-          strokeWidth="2"
-        />
-        <Line
-          x1="10"
-          y1="7"
-          x2="7"
-          y2="4"
-          stroke="#F6B93B"
-          strokeWidth="2"
-        />
-        <Line
-          x1="26"
-          y1="7"
-          x2="29"
-          y2="4"
-          stroke="#F6B93B"
-          strokeWidth="2"
-        />
       </Svg>
     );
   }
@@ -220,12 +179,10 @@ function FeatureIcon({ type }: { type: FeatureType }) {
     <Svg width="36" height="36" viewBox="0 0 36 36">
       <Circle cx="13" cy="13" r="5" fill={IHO.colors.mint} />
       <Circle cx="24" cy="12" r="5" fill="#EF5C75" />
-
       <Path
         d="M4 29C4 23.5 7.7 20 13 20C18.3 20 22 23.5 22 29Z"
         fill={IHO.colors.mint}
       />
-
       <Path
         d="M15 29C15 23.2 18.7 19 24 19C29.3 19 32 23.2 32 29Z"
         fill="#EF5C75"
@@ -240,16 +197,14 @@ const styles = StyleSheet.create({
     backgroundColor: IHO.colors.paper,
     alignItems: 'center',
     paddingHorizontal: 30,
-    paddingTop:150,
+    paddingTop: 150,
     paddingBottom: 34,
   },
-
   appIcon: {
     width: 92,
     height: 92,
     marginBottom: 18,
   },
-
   heading: {
     fontFamily: 'DMSans_700Bold',
     fontSize: 38,
@@ -258,11 +213,9 @@ const styles = StyleSheet.create({
     color: IHO.colors.charcoal,
     textAlign: 'center',
   },
-
   headingMint: {
     color: IHO.colors.mint,
   },
-
   accentLine: {
     width: 48,
     height: 3,
@@ -271,7 +224,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 17,
   },
-
   description: {
     fontFamily: 'DMSans_400Regular',
     fontSize: 13,
@@ -279,7 +231,6 @@ const styles = StyleSheet.create({
     color: IHO.colors.charcoal,
     textAlign: 'center',
   },
-
   descriptionSecond: {
     marginTop: 11,
     fontFamily: 'DMSans_400Regular',
@@ -288,24 +239,20 @@ const styles = StyleSheet.create({
     color: IHO.colors.charcoal,
     textAlign: 'center',
   },
-
   kaClink: {
     fontFamily: 'DMSans_700Bold',
     color: IHO.colors.mint,
   },
-
   features: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 22,
   },
-
   featureItem: {
     width: '24%',
     alignItems: 'center',
   },
-
   featureCircle: {
     width: 52,
     height: 52,
@@ -313,23 +260,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   featureMint: {
     backgroundColor: '#E2F3EE',
   },
-
   featureCream: {
     backgroundColor: '#FFF4DF',
   },
-
   featureYellow: {
     backgroundColor: '#FFF0C8',
   },
-
   featurePink: {
     backgroundColor: '#E6F2ED',
   },
-
   featureLabel: {
     marginTop: 6,
     fontFamily: 'DMSans_600SemiBold',
@@ -337,31 +279,26 @@ const styles = StyleSheet.create({
     color: IHO.colors.charcoal,
     textAlign: 'center',
   },
-
   dots: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginTop: 22,
   },
-
   dot: {
     width: 7,
     height: 7,
     borderRadius: 4,
     backgroundColor: '#D9D9D9',
   },
-
   dotActive: {
     backgroundColor: IHO.colors.mint,
   },
-
   actions: {
-  width: '100%',
-  marginTop: 'auto',
-  gap: 10,
-  },  
-
+    width: '100%',
+    marginTop: 'auto',
+    gap: 10,
+  },
   createButton: {
     width: '100%',
     height: 54,
@@ -370,13 +307,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   createButtonText: {
     fontFamily: 'DMSans_600SemiBold',
     fontSize: 15,
     color: '#FFFFFF',
   },
-
   loginButton: {
     width: '100%',
     height: 54,
@@ -387,13 +322,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   loginButtonText: {
     fontFamily: 'DMSans_600SemiBold',
     fontSize: 15,
     color: IHO.colors.charcoal,
   },
-
   buttonPressed: {
     opacity: 0.78,
   },

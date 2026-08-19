@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -15,7 +15,6 @@ import {
 const COLORS = {
   mint: "#41B39E",
   mintStrong: "#2E8F7D",
-  mintSoft: "#D9F0EC",
   paper: "#FFFFFF",
   charcoal: "#23262B",
   darkGrey: "#5B5F63",
@@ -25,10 +24,23 @@ const COLORS = {
 };
 
 const OTP_LENGTH = 6;
+const OTP_SECONDS = 5 * 60;
 
 export default function VerifyScreen() {
+  const params = useLocalSearchParams<{
+    mobile?: string;
+    mode?: "register" | "reset";
+  }>();
+
+  const mobile =
+    typeof params.mobile === "string" && params.mobile.length > 0
+      ? params.mobile
+      : "your mobile number";
+
+  const mode = params.mode === "reset" ? "reset" : "register";
+
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [secondsRemaining, setSecondsRemaining] = useState(165);
+  const [secondsRemaining, setSecondsRemaining] = useState(OTP_SECONDS);
 
   const inputs = useRef<Array<TextInput | null>>([]);
 
@@ -59,10 +71,7 @@ export default function VerifyScreen() {
     }
   };
 
-  const handleKeyPress = (
-    key: string,
-    index: number
-  ) => {
+  const handleKeyPress = (key: string, index: number) => {
     if (key === "Backspace" && !code[index] && index > 0) {
       inputs.current[index - 1]?.focus();
     }
@@ -70,10 +79,11 @@ export default function VerifyScreen() {
 
   const handleResend = () => {
     setCode(["", "", "", "", "", ""]);
-    setSecondsRemaining(165);
+    setSecondsRemaining(OTP_SECONDS);
     inputs.current[0]?.focus();
 
-    // Real resend OTP API call comes later.
+    // Later: call resend OTP endpoint.
+    // Keep this disabled from real SMS sending until the API flow is wired.
   };
 
   const isComplete = code.every((digit) => digit.length === 1);
@@ -84,7 +94,6 @@ export default function VerifyScreen() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Back */}
         <Pressable
           style={styles.backButton}
           onPress={() => router.back()}
@@ -98,7 +107,6 @@ export default function VerifyScreen() {
         </Pressable>
 
         <View style={styles.content}>
-          {/* Heading */}
           <View style={styles.headingSection}>
             <Text style={styles.heading}>
               Let’s verify{"\n"}
@@ -108,19 +116,16 @@ export default function VerifyScreen() {
             <View style={styles.sunshineLine} />
 
             <Text style={styles.sentText}>
-              We’ve sent a 6-digit code to
+              We sent a 6-digit SMS code to
             </Text>
 
-            <Text style={styles.emailText}>
-              texas@imhavingone.com
-            </Text>
+            <Text style={styles.mobileText}>{mobile}</Text>
 
             <Text style={styles.instruction}>
               Enter the code below to continue.
             </Text>
           </View>
 
-          {/* OTP */}
           <View style={styles.otpRow}>
             {code.map((digit, index) => (
               <TextInput
@@ -136,6 +141,8 @@ export default function VerifyScreen() {
                 keyboardType="number-pad"
                 maxLength={1}
                 selectTextOnFocus
+                textContentType="oneTimeCode"
+                autoComplete="sms-otp"
                 style={[
                   styles.otpInput,
                   digit && styles.otpInputActive,
@@ -144,7 +151,6 @@ export default function VerifyScreen() {
             ))}
           </View>
 
-          {/* Timer */}
           <View style={styles.timerRow}>
             <Text style={styles.timerLabel}>Code expires in </Text>
 
@@ -153,7 +159,6 @@ export default function VerifyScreen() {
             </Text>
           </View>
 
-          {/* Verify */}
           <Pressable
             disabled={!isComplete}
             style={({ pressed }) => [
@@ -162,8 +167,17 @@ export default function VerifyScreen() {
               pressed && isComplete && styles.buttonPressed,
             ]}
             onPress={() => {
-              // Real OTP verification comes later.
-              // Successful verification will route to profile setup.
+              const otp = code.join("");
+
+              // Next step:
+              // POST { mobile, otp } to /api/auth/verify-otp.
+              //
+              // Register mode success:
+              // router.replace("/profile-setup")
+              //
+              // Reset mode success:
+              // router.replace({ pathname: "/reset-password", params: { mobile } })
+              console.log("OTP ready to verify:", otp, mode, mobile);
             }}
           >
             <Text style={styles.verifyButtonText}>
@@ -171,7 +185,6 @@ export default function VerifyScreen() {
             </Text>
           </Pressable>
 
-          {/* Didn't receive */}
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
 
@@ -182,7 +195,6 @@ export default function VerifyScreen() {
             <View style={styles.divider} />
           </View>
 
-          {/* Actions */}
           <View style={styles.actionsRow}>
             <Pressable
               style={styles.action}
@@ -206,18 +218,17 @@ export default function VerifyScreen() {
               onPress={() => router.back()}
             >
               <Ionicons
-                name="mail-outline"
+                name="phone-portrait-outline"
                 size={22}
                 color={COLORS.mintStrong}
               />
 
               <Text style={styles.actionText}>
-                Change email
+                Change number
               </Text>
             </Pressable>
           </View>
 
-          {/* Security */}
           <View style={styles.securityCard}>
             <View style={styles.securityIcon}>
               <Ionicons
@@ -233,8 +244,8 @@ export default function VerifyScreen() {
               </Text>
 
               <Text style={styles.securityText}>
-                We’ll never share your code.{"\n"}
-                ImHavingOne is safe and private.
+                Never share your verification code.{"\n"}
+                ImHavingOne will never ask you for it.
               </Text>
             </View>
           </View>
@@ -249,11 +260,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.paper,
   },
-
   container: {
     flex: 1,
   },
-
   backButton: {
     position: "absolute",
     top: 18,
@@ -263,20 +272,15 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: "center",
   },
-
   content: {
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: 125,
     paddingBottom: 28,
   },
-
-  /* Heading */
-
   headingSection: {
     alignItems: "center",
   },
-
   heading: {
     textAlign: "center",
     fontFamily: "DMSans_700Bold",
@@ -285,11 +289,9 @@ const styles = StyleSheet.create({
     letterSpacing: -1.2,
     color: COLORS.charcoal,
   },
-
   headingMint: {
     color: COLORS.mint,
   },
-
   sunshineLine: {
     width: 44,
     height: 3,
@@ -298,22 +300,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 24,
   },
-
   sentText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
     lineHeight: 20,
     color: COLORS.charcoal,
   },
-
-  emailText: {
+  mobileText: {
     marginTop: 1,
     fontFamily: "DMSans_700Bold",
     fontSize: 14,
     lineHeight: 20,
     color: COLORS.charcoal,
   },
-
   instruction: {
     marginTop: 4,
     fontFamily: "DMSans_400Regular",
@@ -321,16 +320,12 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: COLORS.charcoal,
   },
-
-  /* OTP */
-
   otpRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 8,
     marginTop: 26,
   },
-
   otpInput: {
     flex: 1,
     maxWidth: 48,
@@ -344,34 +339,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: COLORS.charcoal,
   },
-
   otpInputActive: {
     borderColor: COLORS.mint,
   },
-
-  /* Timer */
-
   timerRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 24,
   },
-
   timerLabel: {
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
     color: COLORS.darkGrey,
   },
-
   timerValue: {
     fontFamily: "DMSans_700Bold",
     fontSize: 14,
     color: COLORS.mintStrong,
   },
-
-  /* Verify button */
-
   verifyButton: {
     height: 50,
     borderRadius: 9,
@@ -380,51 +366,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 24,
   },
-
   verifyButtonDisabled: {
     opacity: 0.55,
   },
-
   verifyButtonText: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 15,
     color: COLORS.paper,
   },
-
   buttonPressed: {
     opacity: 0.82,
   },
-
-  /* Divider */
-
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 27,
   },
-
   divider: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
     backgroundColor: COLORS.line,
   },
-
   dividerText: {
     marginHorizontal: 13,
     fontFamily: "DMSans_400Regular",
     fontSize: 11.5,
     color: COLORS.darkGrey,
   },
-
-  /* Secondary actions */
-
   actionsRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 21,
   },
-
   action: {
     flex: 1,
     minHeight: 44,
@@ -433,21 +407,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-
   actionText: {
     fontFamily: "DMSans_500Medium",
     fontSize: 12,
     color: COLORS.charcoal,
   },
-
   verticalDivider: {
     width: StyleSheet.hairlineWidth,
     height: 34,
     backgroundColor: COLORS.line,
   },
-
-  /* Security card */
-
   securityCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -458,22 +427,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
     paddingVertical: 14,
   },
-
   securityIcon: {
     width: 40,
     alignItems: "flex-start",
   },
-
   securityCopy: {
     flex: 1,
   },
-
   securityTitle: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 12.5,
     color: COLORS.charcoal,
   },
-
   securityText: {
     marginTop: 2,
     fontFamily: "DMSans_400Regular",

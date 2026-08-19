@@ -25,10 +25,14 @@ const COLORS = {
 };
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+
+  const canLogin =
+    mobile.replace(/\D/g, "").length >= 10 &&
+    password.length > 0;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -41,7 +45,6 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand */}
           <View style={styles.brandSection}>
             <View style={styles.wordmarkRow}>
               <Text style={styles.wordmarkLight}>Im Having </Text>
@@ -57,33 +60,31 @@ export default function LoginScreen() {
             <View style={styles.sunshineLine} />
           </View>
 
-          {/* Welcome */}
           <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeTitle}>Welcome back.</Text>
+
             <Text style={styles.welcomeText}>
-              Log in to see who’s{" "}
-              <Text style={styles.welcomeMint}>having one.</Text>
+              Log in with your mobile number and password.
             </Text>
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputShell}>
               <Ionicons
-                name="mail-outline"
+                name="phone-portrait-outline"
                 size={18}
                 color={COLORS.darkGrey}
                 style={styles.inputIcon}
               />
 
               <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Email address"
+                value={mobile}
+                onChangeText={setMobile}
+                placeholder="Mobile number"
                 placeholderTextColor={COLORS.faint}
-                keyboardType="email-address"
-                autoCapitalize="none"
+                keyboardType="phone-pad"
                 autoCorrect={false}
-                textContentType="emailAddress"
+                textContentType="telephoneNumber"
                 style={styles.input}
               />
             </View>
@@ -152,73 +153,39 @@ export default function LoginScreen() {
             </View>
 
             <Pressable
+              disabled={!canLogin}
               style={({ pressed }) => [
                 styles.loginButton,
-                pressed && styles.buttonPressed,
+                !canLogin && styles.loginButtonDisabled,
+                pressed && canLogin && styles.buttonPressed,
               ]}
-              onPress={() => router.push("/profile-setup")}
-              //</View>onPress={() => {
-                // Real login will be connected later.
-              //}}
+              onPress={() => {
+                // Real mobile + password login will be wired later.
+              }}
             >
               <Text style={styles.loginButtonText}>Log in</Text>
             </Pressable>
           </View>
 
-          {/* OR */}
-          <View style={styles.orRow}>
-            <View style={styles.divider} />
-            <Text style={styles.orText}>or</Text>
-            <View style={styles.divider} />
+          <View style={styles.infoCard}>
+            <Ionicons
+              name="phone-portrait-outline"
+              size={24}
+              color={COLORS.mintStrong}
+            />
+            <Text style={styles.infoText}>
+              Your mobile number is your ImHavingOne login.
+            </Text>
           </View>
 
-          {/* Social login */}
-          <View style={styles.socialSection}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.socialButton,
-                pressed && styles.socialPressed,
-              ]}
-              onPress={() => {
-                // Apple auth later.
-              }}
-            >
-              <Ionicons
-                name="logo-apple"
-                size={21}
-                color={COLORS.charcoal}
-              />
-              <Text style={styles.socialButtonText}>
-                Continue with Apple
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.socialButton,
-                pressed && styles.socialPressed,
-              ]}
-              onPress={() => {
-                // Google auth later.
-              }}
-            >
-              <Text style={styles.googleG}>G</Text>
-
-              <Text style={styles.socialButtonText}>
-                Continue with Google
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don’t have an account?</Text>
+            <Text style={styles.footerText}>New to ImHavingOne?</Text>
 
             <Pressable
               onPress={() => router.push("/register")}
               hitSlop={8}
             >
-              <Text style={styles.signUpText}>Sign up</Text>
+              <Text style={styles.signUpText}>Create account</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -232,30 +199,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.paper,
   },
-
   keyboardView: {
     flex: 1,
   },
-
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 28,
-    paddingTop: 150,
-    paddingBottom: 24,
+    paddingTop: 138,
+    paddingBottom: 28,
   },
-
-  /* Brand */
-
   brandSection: {
     alignItems: "center",
   },
-
   wordmarkRow: {
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "center",
   },
-
   wordmarkLight: {
     fontFamily: "DMSans_400Regular",
     fontSize: 30,
@@ -263,7 +223,6 @@ const styles = StyleSheet.create({
     color: COLORS.charcoal,
     letterSpacing: -1.2,
   },
-
   wordmarkBold: {
     fontFamily: "DMSans_700Bold",
     fontSize: 30,
@@ -271,14 +230,12 @@ const styles = StyleSheet.create({
     color: COLORS.mint,
     letterSpacing: -1.2,
   },
-
   wordmarkDot: {
     fontFamily: "DMSans_700Bold",
     fontSize: 30,
     lineHeight: 35,
     color: COLORS.mint,
   },
-
   tagline: {
     marginTop: 2,
     fontFamily: "DMSans_600SemiBold",
@@ -286,11 +243,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: COLORS.charcoal,
   },
-
   taglineMint: {
     color: COLORS.mintStrong,
   },
-
   sunshineLine: {
     width: 42,
     height: 3,
@@ -298,85 +253,67 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.sunshine,
     marginTop: 18,
   },
-
-  /* Welcome */
-
   welcomeSection: {
     alignItems: "center",
-    marginTop: 19,
+    marginTop: 25,
   },
-
   welcomeTitle: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 22,
-    lineHeight: 28,
+    fontFamily: "DMSans_700Bold",
+    fontSize: 28,
+    lineHeight: 33,
     color: COLORS.charcoal,
   },
-
   welcomeText: {
-    marginTop: 5,
+    marginTop: 7,
+    textAlign: "center",
     fontFamily: "DMSans_400Regular",
-    fontSize: 13,
-    lineHeight: 19,
-    color: COLORS.charcoal,
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: COLORS.darkGrey,
   },
-
-  welcomeMint: {
-    color: COLORS.mintStrong,
-  },
-
-  /* Form */
-
   form: {
-    marginTop: 17,
-    gap: 10,
+    marginTop: 28,
+    gap: 11,
   },
-
   inputShell: {
-    height: 48,
+    height: 50,
     borderWidth: 1,
     borderColor: COLORS.line,
-    borderRadius: 8,
+    borderRadius: 9,
     backgroundColor: COLORS.paper,
     flexDirection: "row",
     alignItems: "center",
   },
-
   inputIcon: {
     marginLeft: 14,
     marginRight: 11,
   },
-
   input: {
     flex: 1,
     height: "100%",
     paddingVertical: 0,
     paddingRight: 10,
     fontFamily: "DMSans_400Regular",
-    fontSize: 13,
+    fontSize: 13.5,
     color: COLORS.charcoal,
   },
-
   eyeButton: {
     width: 44,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
-
   optionsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    minHeight: 30,
+    minHeight: 32,
   },
-
   rememberRow: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 30,
+    minHeight: 32,
   },
-
   checkbox: {
     width: 16,
     height: 16,
@@ -387,116 +324,69 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 8,
   },
-
   checkboxChecked: {
     backgroundColor: COLORS.mint,
     borderColor: COLORS.mint,
   },
-
   rememberText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 11.5,
     color: COLORS.charcoal,
   },
-
   forgotText: {
     fontFamily: "DMSans_500Medium",
     fontSize: 11.5,
     color: COLORS.mintStrong,
   },
-
   loginButton: {
     height: 50,
-    borderRadius: 8,
+    borderRadius: 9,
     backgroundColor: COLORS.mint,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 2,
+    marginTop: 4,
   },
-
+  loginButtonDisabled: {
+    opacity: 0.48,
+  },
   loginButtonText: {
-    fontFamily: "DMSans_500Medium",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 15,
     color: COLORS.paper,
   },
-
   buttonPressed: {
     opacity: 0.82,
   },
-
-  /* OR */
-
-  orRow: {
+  infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 21,
-  },
-
-  divider: {
-    flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: COLORS.line,
-  },
-
-  orText: {
-    marginHorizontal: 15,
-    fontFamily: "DMSans_400Regular",
-    fontSize: 11.5,
-    color: COLORS.charcoal,
-  },
-
-  /* Social */
-
-  socialSection: {
-    gap: 10,
-  },
-
-  socialButton: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    borderRadius: 8,
-    backgroundColor: COLORS.paper,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     gap: 12,
+    marginTop: 26,
+    borderRadius: 12,
+    backgroundColor: "#F1F7F5",
+    paddingHorizontal: 17,
+    paddingVertical: 15,
   },
-
-  socialButtonText: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 13.5,
+  infoText: {
+    flex: 1,
+    fontFamily: "DMSans_400Regular",
+    fontSize: 11.8,
+    lineHeight: 17,
     color: COLORS.charcoal,
   },
-
-  googleG: {
-    width: 21,
-    textAlign: "center",
-    fontFamily: "DMSans_700Bold",
-    fontSize: 20,
-    color: "#4285F4",
-  },
-
-  socialPressed: {
-    backgroundColor: "#F8F8F6",
-  },
-
-  /* Footer */
-
   footer: {
+    marginTop: "auto",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    marginTop: 20,
+    paddingTop: 28,
   },
-
   footerText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 11.5,
     color: COLORS.charcoal,
   },
-
   signUpText: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 11.5,

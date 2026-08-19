@@ -1,7 +1,7 @@
 const express = require("express");
 
 const {
-  normalizeSouthAfricanMobile,
+  normalizeMobileNumber,
 } = require("../services/mobileService");
 
 const {
@@ -36,12 +36,12 @@ router.post("/register", async (req, res) => {
     });
   }
 
-  const normalizedMobile = normalizeSouthAfricanMobile(mobile);
+  const normalizedMobile = normalizeMobileNumber(mobile);
 
   if (!normalizedMobile) {
     return res.status(400).json({
       ok: false,
-      message: "Please enter a valid South African mobile number.",
+      message: "Please enter a valid mobile number.",
     });
   }
 
@@ -61,7 +61,7 @@ router.post("/register", async (req, res) => {
   const smsMessage =
     `Your ImHavingOne verification code is ${otp}`;
 
-      try {
+  try {
     await sendSms(
       normalizedMobile.replace("+", ""),
       smsMessage,
@@ -100,16 +100,19 @@ router.post("/verify-otp", (req, res) => {
     });
   }
 
-  const normalizedMobile = normalizeSouthAfricanMobile(mobile);
+  const normalizedMobile = normalizeMobileNumber(mobile);
 
   if (!normalizedMobile) {
     return res.status(400).json({
       ok: false,
-      message: "Please enter a valid South African mobile number.",
+      message: "Please enter a valid mobile number.",
     });
   }
 
-  const result = verifyOtp(normalizedMobile, String(otp));
+  const result = verifyOtp(
+    normalizedMobile,
+    String(otp)
+  );
 
   if (!result.valid) {
     return res.status(400).json({
